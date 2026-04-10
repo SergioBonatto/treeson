@@ -1,6 +1,6 @@
 [project]
 name = "treeson"
-version = "0.1.1"
+dynamic = ["version"]
 description = "Convert directory structures and GitHub repositories to JSON format"
 authors = [
     { name = "Sergio Bonatto" }

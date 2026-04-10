@@ -3,7 +3,7 @@ import os
 import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
-from treeson.cli import dir_to_json, github_repo_to_json, TreesonConfig, DEFAULT_IGNORES
+from treeson import dir_to_json, github_repo_to_json, TreesonConfig, DEFAULT_IGNORES
 
 @pytest.fixture
 def temp_dir(tmp_path):
