@@ -3,10 +3,10 @@ name = "treeson"
 version = "0.1.1"
 description = "Convert directory structures and GitHub repositories to JSON format"
 authors = [
-    { name = "Sergio Bonatto", X = "@fiBonatto"  }
+    { name = "Sergio Bonatto" }
 ]
 maintainers = [
-    { name = "Sergio Bonatto", X = "@fiBonatto" }
+    { name = "Sergio Bonatto" }
 ]
 license = { text = "MIT" }
 readme = "README.md"
@@ -14,7 +14,7 @@ homepage = "https://github.com/SergioBonatto/treeson"
 repository = "https://github.com/SergioBonatto/treeson"
 documentation = "https://github.com/SergioBonatto/treeson#readme"
 changelog = "https://github.com/SergioBonatto/treeson/blob/main/CHANGELOG.md"
-requires-python = ">=3.8"
+requires-python = ">=3.8.1"
 keywords = [
     "directory",
     "tree",
@@ -109,7 +109,7 @@ line_length = 88
 known_first_party = ["treeson"]
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.9"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true

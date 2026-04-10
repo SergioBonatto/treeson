@@ -7,16 +7,19 @@ and tooling purposes.
 """
 
 import argparse
+import fnmatch
 import json
+import os
 import sys
+from importlib import metadata
 from pathlib import Path
-from typing import Dict, Set, List, Optional
+from typing import Dict, Set, List, Optional, Any
 from dataclasses import dataclass, field
 
 try:
     import requests
 except ImportError:
-    requests = None
+    requests = None  # type: ignore
 
 
 DEFAULT_IGNORES = frozenset({
@@ -47,7 +50,7 @@ class TreesonConfig:
         """Check if a file or directory should be ignored."""
         if not self.include_hidden and name.startswith('.'):
             return True
-        return name in self.ignores
+        return any(fnmatch.fnmatch(name, pattern) for pattern in self.ignores)
 
 
 class TreesonError(Exception):
@@ -94,30 +97,34 @@ def dir_to_json(
     if not path.is_dir():
         raise TreesonError(f"Path is not a directory: {path}")
 
-    result = {"files": []}
+    result: Dict[str, Any] = {"files": []}
 
     # Check max depth
     if config.max_depth is not None and current_depth >= config.max_depth:
         return result
 
     try:
-        items = sorted(path.iterdir(), key=lambda x: (not x.is_dir(), x.name.lower()))
-    except PermissionError as e:
+        # Use os.scandir for better performance
+        with os.scandir(path) as it:
+            entries = sorted(it, key=lambda e: (not e.is_dir(), e.name.lower()))
+            
+            for entry in entries:
+                if config.should_ignore(entry.name):
+                    continue
+
+                try:
+                    if entry.is_file():
+                        result["files"].append(entry.name)
+                    elif entry.is_dir():
+                        result[entry.name] = dir_to_json(
+                            Path(entry.path), config, current_depth + 1
+                        )
+                except PermissionError:
+                    print(f"Warning: Permission denied accessing {entry.path}", file=sys.stderr)
+                    continue
+    except PermissionError:
         print(f"Warning: Permission denied accessing {path}", file=sys.stderr)
         return result
-
-    for item in items:
-        if config.should_ignore(item.name):
-            continue
-
-        try:
-            if item.is_file():
-                result["files"].append(item.name)
-            elif item.is_dir():
-                result[item.name] = dir_to_json(item, config, current_depth + 1)
-        except PermissionError:
-            print(f"Warning: Permission denied accessing {item}", file=sys.stderr)
-            continue
 
     return result
 
@@ -180,6 +187,10 @@ def github_repo_to_json(
 
     for node in tree:
         path_parts = node["path"].split("/")
+
+        # Check max depth
+        if config.max_depth is not None and len(path_parts) > config.max_depth:
+            continue
 
         # Check if any part should be ignored
         if any(config.should_ignore(part) for part in path_parts):
@@ -269,10 +280,15 @@ Examples:
         help="Output compact JSON (no indentation)"
     )
 
+    try:
+        version = metadata.version("treeson")
+    except metadata.PackageNotFoundError:
+        version = "unknown"
+
     parser.add_argument(
         "--version",
         action="version",
-        version="%(prog)s 1.0.0"
+        version=f"%(prog)s {version}"
     )
 
     return parser
@@ -290,7 +306,7 @@ def main() -> int:
 
     # Build configuration
     config = TreesonConfig(
-        ignores=DEFAULT_IGNORES.union(args.ignore),
+        ignores=set(DEFAULT_IGNORES.union(args.ignore)),
         include_hidden=args.include_hidden,
         max_depth=args.max_depth
     )
