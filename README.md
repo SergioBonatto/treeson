@@ -80,11 +80,12 @@ treeson [TARGET] [OPTIONS]
 |--------|-------|-------------|
 | `--ignore PATTERN` | `-i` | Additional files/folders to ignore (can be used multiple times) |
 | `--branch NAME` | `-b` | GitHub branch name (default: main) |
-| `--include-hidden` | | Include hidden files and directories |
-| `--max-depth N` | | Maximum directory depth to traverse |
+| `--include-hidden` | `-H` | Include hidden files and directories |
+| `--max-depth N` | `-d` | Maximum directory depth to traverse |
 | `--output FILE` | `-o` | Write output to file instead of stdout |
-| `--compact` | | Output compact JSON (no indentation) |
-| `--version` | | Show version and exit |
+| `--compact` | `-c` | Output compact JSON (no indentation) |
+| `--pretty` | `-p` | Pretty-printed JSON with system-native syntax highlighting |
+| `--version` | `-v` | Show version and exit |
 
 ## Output Format
 
@@ -93,7 +94,9 @@ The tool generates a JSON structure where:
 - Files are listed in a `"files"` array within each directory
 - The structure preserves the hierarchical organization
 
-### Example output
+### Example output (Pretty Printed)
+
+Using `treeson --pretty` will output formatted JSON with syntax highlighting that respects your terminal's color theme:
 
 ```json
 {
@@ -110,10 +113,11 @@ The tool generates a JSON structure where:
 }
 ```
 
-## Configuration
+## Requirements
 
-### Programmatic Usage
-
+- Python 3.8+
+- `requests` library (included as dependency)
+- `pygments` library (for syntax highlighting)
 ```python
 from treeson import dir_to_json, TreesonConfig
 from pathlib import Path

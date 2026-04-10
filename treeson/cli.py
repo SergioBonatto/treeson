@@ -51,13 +51,13 @@ Examples:
     )
 
     parser.add_argument(
-        "--include-hidden",
+        "--include-hidden", "-H",
         action="store_true",
         help="Include hidden files and directories"
     )
 
     parser.add_argument(
-        "--max-depth",
+        "--max-depth", "-d",
         type=int,
         metavar="N",
         help="Maximum directory depth to traverse"
@@ -69,14 +69,21 @@ Examples:
         help="Write output to file instead of stdout"
     )
 
-    parser.add_argument(
-        "--compact",
+    output_format = parser.add_mutually_exclusive_group()
+    output_format.add_argument(
+        "--compact", "-c",
         action="store_true",
         help="Output compact JSON (no indentation)"
     )
 
+    output_format.add_argument(
+        "--pretty", "-p",
+        action="store_true",
+        help="Output pretty-printed JSON (indent=2)"
+    )
+
     parser.add_argument(
-        "--version",
+        "--version", "-v",
         action="version",
         version=f"%(prog)s {__version__}"
     )
@@ -109,6 +116,11 @@ def main() -> int:
             output_path = Path(args.output)
             output_path.write_text(output, encoding="utf-8")
             print(f"Output written to: {output_path}", file=sys.stderr)
+        elif args.pretty:
+            from pygments import highlight
+            from pygments.lexers import JsonLexer
+            from pygments.formatters import TerminalFormatter
+            sys.stdout.write(highlight(output, JsonLexer(), TerminalFormatter()))
         else:
             print(output)
 

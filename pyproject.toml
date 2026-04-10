@@ -45,6 +45,7 @@ classifiers = [
 ]
 
 dependencies = [
+    "pygments>=2.19.2",
     "requests>=2.31.0",
 ]
 

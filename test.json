@@ -1,0 +1,19 @@
+{
+  "files": [
+    "pyproject.toml",
+    "README.md",
+    "uv.lock"
+  ],
+  "tests": {
+    "files": [
+      "test_cli.py"
+    ]
+  },
+  "treeson": {
+    "files": [
+      "__init__.py",
+      "cli.py",
+      "core.py"
+    ]
+  }
+}
